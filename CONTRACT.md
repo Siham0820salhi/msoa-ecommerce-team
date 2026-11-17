@@ -11,9 +11,9 @@ Ce document est la règle commune des 4 membres. Toute modification doit être v
 | Auth | 8081 | auth.db | ESSADIKI Ibtissam | <techno> |
 | Catalog | 8082 | catalog.db | SALHI_Siham | FastAPI + SQLite |
 | Inventory | 8083 | inventory.db | SALHI_Siham | FastAPI + SQLite |
-| Orders | 8084 | orders.db | <Nom> | Zineb |
-| Payments | 8085 | payments.db | <Nom> | ELMIR Hasnae |
-| Shipping | 8086 | shipping.db | <Nom> | ELMIR Hasnae |
+| Orders | 8084 | orders.db | Zineb  |  |
+| Payments | 8085 | payments.db | ELMIR Hasnae|  |
+| Shipping | 8086 | shipping.db |  ELMIR Hasnae | |
 
 Frontend (Vite) : http://localhost:5173
 
