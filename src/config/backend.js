@@ -1,8 +1,8 @@
 
 const BACKEND_MODE = {
   AUTH: "mock",
-  CATALOG: "rest",
-  INVENTORY: "rest",
+  CATALOG: "mock",
+  INVENTORY: "mock",
   ORDERS: "mock",
   PAYMENTS: "mock",
   SHIPPING: "mock",
