@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+venv/
+demo_db/
+__pycache__/
+*.backup.db
