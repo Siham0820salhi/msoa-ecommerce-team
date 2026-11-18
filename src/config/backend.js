@@ -4,8 +4,8 @@ const BACKEND_MODE = {
   CATALOG: "mock",
   INVENTORY: "mock",
   ORDERS: "mock",
-  PAYMENTS: "mock",
-  SHIPPING: "mock",
+  PAYMENTS: "rest",
+  SHIPPING: "rest",
 };
 
 const API_URLS = {
