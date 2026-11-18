@@ -1,0 +1,20 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Environments
+.env
+.venv/
+env/
+venv/
+
+# Testing cache
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Databases & local run logs
+*.db
+*.log
