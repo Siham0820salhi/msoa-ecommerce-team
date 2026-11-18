@@ -54,3 +54,4 @@ See [`docs/contract/04_payments_shipping.md`](contract/04_payments_shipping.md) 
 ## PART III — API Evolution (Q4 · Q5 · Q6)
 
 See [`docs/contract/05_evolution.md`](contract/05_evolution.md) for the full analysis and implementation.
+

@@ -482,3 +482,4 @@ SHIPPING: {
 ```
 
 When set to `"rest"`, `src/services/shippingService.js` calls the live FastAPI service directly. No React component or service file was modified.
+
