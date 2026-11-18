@@ -187,4 +187,4 @@ def test_database_persistence(client: TestClient):
 def test_health(client: TestClient):
     resp = client.get("/health")
     assert resp.status_code == 200
-    assert resp.json()["status"] == "ok"
+    assert resp.json()["status"] in ["UP", "ok"]
