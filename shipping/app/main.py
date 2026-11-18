@@ -6,14 +6,15 @@ from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.database import engine, Base
+from app.database import engine, Base, init_db
 from app.models.shipment import Shipment  # noqa: F401
 from app.routes.shipments import router as shipments_router
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    Base.metadata.create_all(bind=engine)
+    # Initialise DB from schema.sql + seed.sql (lab-provided files)
+    init_db()
     yield
 
 
