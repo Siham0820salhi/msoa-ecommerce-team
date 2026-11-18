@@ -354,15 +354,17 @@ PREPARING → SHIPPED → IN_TRANSIT → DELIVERED
 
 ```json
 {
-  "id":             "shipment-demo-001",
-  "orderId":        "order-demo-001",
-  "recipientName":  "Demo Customer",
-  "address":        "123 Main Street",
-  "city":           "Casablanca",
+  "id": "shipment-demo-001",
+  "orderId": "order-demo-001",
+  "address": {
+    "name": "Demo Customer",
+    "address": "123 Main Street",
+    "city": "Casablanca"
+  },
   "trackingNumber": "MSOA-DEMO001",
-  "status":         "DELIVERED",
-  "createdAt":      "2026-11-01T10:02:00Z",
-  "updatedAt":      "2026-11-03T15:00:00Z"
+  "status": "DELIVERED",
+  "createdAt": "2026-11-01T10:02:00Z",
+  "updatedAt": "2026-11-03T15:00:00Z"
 }
 ```
 
@@ -370,11 +372,12 @@ PREPARING → SHIPPED → IN_TRANSIT → DELIVERED
 |---|---|---|
 | `id` | string | UUID (TEXT PK) |
 | `orderId` | string | Linked order ID |
-| `recipientName` | string | Recipient full name |
-| `address` | string | Street address |
-| `city` | string | City |
+| `address` | object | Nested address object containing `name`, `address`, and `city` |
+| `address.name` | string | Recipient full name |
+| `address.address` | string | Street address |
+| `address.city` | string | City |
 | `trackingNumber` | string | Auto-generated `MSOA-XXXXXXXX` |
-| `status` | string | Current delivery status |
+| `status` | string | Current delivery status (`PREPARING`, `SHIPPED`, `IN_TRANSIT`, `DELIVERED`, `CANCELLED`) |
 | `createdAt` | string | ISO 8601 UTC — creation time |
 | `updatedAt` | string | ISO 8601 UTC — last status change |
 
