@@ -40,7 +40,7 @@ Le Gist du prof utilise la clé `error`. Nous utilisons `message` parce que le f
 | 409 | Conflit (stock insuffisant, transition ou annulation interdite) |
 | 500 | Erreur interne du serveur |
 | 502 / 503 | Service appelé indisponible |
-
+| 422 | Erreur de validation du body (utilisé par Payments et Shipping) |
 ## 5. Services, ports et bases
 
 | Service | Port | Base SQLite |
