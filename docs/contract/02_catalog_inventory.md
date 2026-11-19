@@ -18,6 +18,7 @@ Objet Product :
   "name": "string",
   "category": "string",
   "price": "number",
+  "currency": "string (ISO 4217, ex. MAD), ajouté en v1.1, rétrocompatible",
   "image": "string (URL)",
   "description": "string"
 }
@@ -45,6 +46,26 @@ Description : retourne un produit par son identifiant.
 - Erreurs :
   - `404` -> `{ "message": "Product not found" }`
   - `400` -> `{ "message": "Invalid request" }` (id non entier)
+
+
+## GET /v2/products
+
+Description : liste des produits avec la nouvelle structure de prix.
+- URL Params : aucun
+- Headers : `Accept: application/json`
+- Succès : `200` -> `[ {<product_v2>} ]`, où `price` = `{ "amount": number, "currency": "string" }`
+- Erreurs : `500` -> `{ "message": "Internal error" }`
+
+## GET /v2/products/{id}
+
+Description : un produit avec la nouvelle structure de prix.
+- URL Params : `id=[integer]` (requis)
+- Succès : `200` -> `{<product_v2>}`
+- Erreurs :
+  - `404` -> `{ "message": "Product not found" }`
+  - `400` -> `{ "message": "Invalid request" }`
+
+Note : les réponses de `/products` et `/products/{id}` (v1) portent les headers `Deprecation: true` et `Link: </v2/products>; rel="successor-version"`.
 
 ## GET /health
 

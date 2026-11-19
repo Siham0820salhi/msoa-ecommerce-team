@@ -483,6 +483,17 @@ SHIPPING: {
   API_URLS: { BASE: "http://localhost:8086" }
 }
 ```
+## Interactions (Payments et Shipping)
+
+| Fournisseur | Consommateur | Information échangée |
+|---|---|---|
+| Payments | Frontend | Création et consultation d'un paiement (`/api/payments`) |
+| Shipping | Frontend | Création et suivi d'une expédition (`/api/shipments`) |
+| Shipping | Orders | Statut de l'expédition (`GET /api/shipments/order/{orderId}`) avant d'annuler une commande PAID |
+| Orders | Payments | `GET /api/orders/{id}` pour vérifier la commande et le montant. Header `X-Service-Key` |
+| Orders | Payments | `PATCH /api/orders/{id}/status` -> `PAID` après un paiement `SUCCESS` |
+| Orders | Shipping | `GET /api/orders/{id}` pour vérifier que la commande est PAID, puis `PATCH .../status` -> `SHIPPED` / `DELIVERED` |
+
 
 When set to `"rest"`, `src/services/shippingService.js` calls the live FastAPI service directly. No React component or service file was modified.
 
