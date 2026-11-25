@@ -28,3 +28,9 @@ PAID_REQUIRES_SERVICE_KEY = _flag("PAID_REQUIRES_SERVICE_KEY", "true")
 
 # Business rules
 SHIPPING_CHECK_ON_CANCEL = _flag("SHIPPING_CHECK_ON_CANCEL", "true")
+
+# LAB 4
+INVENTORY_GRPC_TARGET = os.getenv('INVENTORY_GRPC_TARGET', 'localhost:50051')
+GRPC_TIMEOUT = float(os.getenv('GRPC_TIMEOUT', '5'))
+KAFKA_BOOTSTRAP_SERVERS = os.getenv('KAFKA_BOOTSTRAP_SERVERS', 'localhost:9092')
+KAFKA_TOPIC = 'ecommerce.events'

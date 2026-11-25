@@ -6,7 +6,7 @@ from typing import List
 from sqlalchemy.orm import Session
 
 from app import config
-from app.clients import catalog_client, inventory_client, shipping_client
+from app.clients import catalog_client, inventory_client, shipping_client, events
 from app.errors import ApiError
 from app.models.order import Order, OrderItem
 from app.schemas.order import OrderCreate
@@ -144,6 +144,7 @@ def create_order(db: Session, data: OrderCreate, caller: Caller) -> Order:
         except ApiError:
             logger.error("Compensation failed: stock %s must be released manually", stock_items)
         raise ApiError(500, "Could not save the order")
+    events.publish("OrderCreated", order)
     return order
 
 
@@ -193,6 +194,7 @@ def cancel_order(db: Session, order_id: str, caller: Caller) -> Order:
     )
     db.commit()
     db.refresh(order)
+    events.publish("OrderCancelled", order)
     return order
 
 
