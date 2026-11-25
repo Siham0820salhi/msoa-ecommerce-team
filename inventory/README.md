@@ -69,3 +69,9 @@ curl -X POST http://localhost:8083/api/inventory/reserve -H "Content-Type: appli
 | release | 200, stock restauré |
 | produit 999 | 404 |
 | quantity = 0 | 400 |
+
+## LAB 4 : gRPC
+- Serveur gRPC : `python grpc_server.py` (port 50051), contrat `proto/inventory.proto`.
+- Utilisé par Orders pour check / reserve / release. Les endpoints REST restent actifs pour le frontend.
+- Régénérer le code (depuis la racine) : `python -m grpc_tools.protoc -I proto --python_out=inventory --grpc_python_out=inventory proto/inventory.proto`
+- Test : `python grpc_client_test.py`.
