@@ -142,3 +142,15 @@ If a called service is down, Orders answers `503` (or `502` for an invalid answe
 pytest tests/ -v
 ```
 The tests replace Auth, Catalog, Inventory and Shipping with fakes, so they run without the other services.
+
+## LAB 4 — Orders (Zineb)
+
+From repository root: `docker compose up -d`. Start Auth, Catalog, Shipping and Inventory as documented in their READMEs. Inventory must expose gRPC on port 50051. From `orders/`: `python -m pip install -r requirements.txt`, then `python -m uvicorn app.main:app --port 8084`. Run `python -m pytest -q` for regression and local gRPC integration tests.
+
+ReserveStock and ReleaseStock now use gRPC with the shared protobuf contract. REST endpoints, Auth, Catalog, Shipping and PAID remain unchanged. Error mapping: INVALID_ARGUMENT 400, NOT_FOUND 404, FAILED_PRECONDITION 409, UNAVAILABLE/DEADLINE_EXCEEDED 503. No application-level automatic retry of stock mutations. The existing atomic stock_released claim prevents repeated normal cancellation; the shared proto has no operation ID, so exactly-once cannot be guaranteed after an ambiguous network failure or crash.
+
+The checked-in protobuf descriptor is derived from the shared proto. To regenerate standard bindings from repository root: `python -m grpc_tools.protoc -I proto --python_out=orders/app/clients proto/inventory.proto`. The client uses the gRPC unary RPC API directly.
+
+Kafka: `localhost:9092`, topic `ecommerce.events`, key orderId. OrderCreated and OrderCancelled are published after database commit. Broker failure is logged and does not roll back orders; events may be lost during outages (no outbox required by this lab). The JSON includes the repository contract fields plus eventType, timestamp and payload.orderId aliases requested by Analytics in the group message. Confirm these additive aliases with the team before merging if strict schema validation is enabled.
+
+Real broker verification (repository root): `docker exec msoa-kafka /opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic ecommerce.events --from-beginning --property print.key=true`. Create and cancel an order via the existing frontend or API. Capture the stock before/after, HTTP 409 for excessive quantity, HTTP 503 with Inventory stopped, and Kafka events. Save captures under docs/tests/lab4/. Local test output is already provided there; real team services and Kafka broker were not available in the preparation environment.

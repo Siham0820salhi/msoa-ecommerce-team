@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app import config
-from app.clients import auth_client, catalog_client, inventory_client, shipping_client
+from app.clients import auth_client, catalog_client, inventory_client, shipping_client, events
 from app.database import Base, get_db
 from app.errors import ApiError
 from app.main import app
@@ -94,6 +94,8 @@ class FakeShipping:
 @pytest.fixture
 def services(monkeypatch):
     inventory, catalog, shipping = FakeInventory(), FakeCatalog(), FakeShipping()
+    published = []
+    monkeypatch.setattr(events, "publish", lambda kind, order: published.append(events.build_event(kind, order)))
 
     def fake_verify(authorization):
         user = TOKENS.get(authorization)
@@ -110,7 +112,7 @@ def services(monkeypatch):
     monkeypatch.setattr(config, "INTERNAL_API_KEY", SERVICE_KEY)
     monkeypatch.setattr(config, "PAID_REQUIRES_SERVICE_KEY", True)
     monkeypatch.setattr(config, "SHIPPING_CHECK_ON_CANCEL", True)
-    return SimpleNamespace(inventory=inventory, catalog=catalog, shipping=shipping)
+    return SimpleNamespace(inventory=inventory, catalog=catalog, shipping=shipping, published=published)
 
 
 @pytest.fixture(autouse=True)
