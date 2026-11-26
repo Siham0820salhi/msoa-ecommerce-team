@@ -6,16 +6,30 @@ from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
+from app import config
 from app.database import engine, Base, init_db
+from app.events.outbox_worker import OutboxWorker
 from app.routes.payments import router as payments_router
 import app.models.payment  # noqa: F401
+import app.models.outbox  # noqa: F401
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Initialise DB from schema.sql + seed.sql (lab-provided files)
     init_db()
-    yield
+    # LAB 4: background publisher draining the transactional outbox.
+    # Disabled with OUTBOX_PUBLISHER_ENABLED=false (used by the test suite so
+    # tests never reach for a real broker).
+    worker = None
+    if config.OUTBOX_PUBLISHER_ENABLED:
+        worker = OutboxWorker()
+        worker.start()
+    try:
+        yield
+    finally:
+        if worker is not None:
+            worker.stop()
 
 
 app = FastAPI(

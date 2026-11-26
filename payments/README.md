@@ -104,3 +104,55 @@ uvicorn app.main:app --host 0.0.0.0 --port 8085 --reload
 ```bash
 pytest tests/ -v
 ```
+
+---
+
+## LAB 4 — Asynchronous shipment events (RabbitMQ producer)
+
+When a payment **succeeds**, Payments records a `PaymentSucceeded` event and a
+background worker publishes it to RabbitMQ. Shipping consumes it and prepares
+the shipment. Failed payments publish nothing.
+
+**The customer never waits for RabbitMQ or Shipping.** Nothing in the HTTP
+request path talks to the broker: the payment row and its event row are written
+in the *same* database transaction, and publishing happens afterwards in a
+background thread. A payment therefore returns `201` normally even when the
+broker is completely down, and the event is published as soon as it comes back.
+
+### Transactional outbox
+
+| Table | Purpose |
+|---|---|
+| `outbox_events` | One row per pending/published event, written in the payment's transaction |
+
+Row states: `PENDING` → `PUBLISHED`. A row stays `PENDING` while the broker is
+unreachable; `attempts` and `last_error` record what is happening.
+
+### Configuration (environment variables)
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `RABBITMQ_URL` | `amqp://guest:guest@localhost:5672/%2F` | Broker connection |
+| `RABBITMQ_QUEUE` | `shipment.requests` | Durable work queue |
+| `RABBITMQ_DLX` | `shipment.dlx` | Dead-letter exchange |
+| `OUTBOX_PUBLISHER_ENABLED` | `true` | Set to `false` to run the API without the publisher |
+| `OUTBOX_POLL_INTERVAL` | `5` | Seconds between polls when the outbox is empty |
+| `OUTBOX_BACKOFF_MIN` / `OUTBOX_BACKOFF_MAX` | `1` / `30` | Retry backoff bounds |
+| `ORDERS_URL` | `http://localhost:8084` | Read (best effort) to enrich events with the delivery address |
+| `INTERNAL_API_KEY` | `msoa-internal-dev-key` | Shared secret sent as `X-Service-Key` when calling Orders. Must match Orders' value. |
+
+### Extra endpoint
+
+`GET /api/payments/outbox[?status_filter=PENDING]` — read-only view of the
+outbox, used to demonstrate that an event survives a broker outage. Purely
+additive: no existing endpoint changed.
+
+### Run it
+
+```bash
+docker compose up -d rabbitmq          # from the repository root
+uvicorn app.main:app --port 8085
+pytest tests/ -v                       # 25 tests, no broker needed
+```
+
+Full design notes: `payments/LAB4_rabbitmq_payments_shipping.md`.
