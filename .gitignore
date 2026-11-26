@@ -27,3 +27,4 @@ venv/
 demo_db/
 __pycache__/
 *.backup.db
+analytics/analytics.db
