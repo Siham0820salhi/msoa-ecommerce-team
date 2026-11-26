@@ -1,3 +1,9 @@
+import os
+
+# LAB 4: keep the test suite completely broker-free. This must run BEFORE
+# app.config is imported, since the flag is read at import time.
+os.environ.setdefault("OUTBOX_PUBLISHER_ENABLED", "false")
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine

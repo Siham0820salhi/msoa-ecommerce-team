@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import engine, Base, init_db
 from app.models.shipment import Shipment  # noqa: F401
+from app.models.processed_event import ProcessedEvent  # noqa: F401
 from app.routes.shipments import router as shipments_router
 
 

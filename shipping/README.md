@@ -132,3 +132,61 @@ uvicorn app.main:app --host 0.0.0.0 --port 8086 --reload
 ```bash
 pytest tests/ -v
 ```
+
+---
+
+## LAB 4 — Asynchronous shipment events (RabbitMQ consumer)
+
+Shipping consumes `PaymentSucceeded` messages from the durable queue
+`shipment.requests` and creates the shipment with the **existing** business
+logic, so the status lifecycle (`PREPARING → SHIPPED → IN_TRANSIT →
+DELIVERED/CANCELLED`) and the `MSOA-XXXXXXXX` tracking-number format are
+unchanged.
+
+**The REST API is untouched.** The consumer runs as a *separate process*; the
+API works with or without it.
+
+### Reliability
+
+| Property | How |
+|---|---|
+| No lost message | Durable queue, persistent messages, manual acknowledgement |
+| Ack only after commit | The message is acknowledged *after* the shipment is committed |
+| No duplicate shipment | `processed_events` table keyed by `eventId`, plus `UNIQUE(order_id)` |
+| Transient failures | Retried with an attempt counter, up to `CONSUMER_MAX_ATTEMPTS` |
+| Poison messages | Dead-lettered to `shipment.requests.dlq` via `shipment.dlx` |
+
+Delivery is **at-least-once with idempotent processing**, not exactly-once: a
+crash between the commit and the ack causes a redelivery, which the
+idempotency ledger makes harmless.
+
+### Delivery address
+
+The event carries the address when Payments could read it from Orders. If it
+is absent, the consumer fetches it from Orders itself. If neither works the
+message is **retried**, never turned into a shipment with placeholder data.
+
+### Configuration (environment variables)
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `RABBITMQ_URL` | `amqp://guest:guest@localhost:5672/%2F` | Broker connection |
+| `RABBITMQ_QUEUE` | `shipment.requests` | Durable work queue |
+| `RABBITMQ_DLX` / `RABBITMQ_DLQ` | `shipment.dlx` / `shipment.requests.dlq` | Dead-letter routing |
+| `CONSUMER_MAX_ATTEMPTS` | `5` | Deliveries before a message is dead-lettered |
+| `CONSUMER_RETRY_DELAY` | `2` | Seconds before retrying a transient failure |
+| `CONSUMER_PREFETCH` | `1` | Unacknowledged messages in flight |
+| `ORDERS_URL` | `http://localhost:8084` | Fallback source for the delivery address |
+| `INTERNAL_API_KEY` | `msoa-internal-dev-key` | Shared secret sent as `X-Service-Key` when calling Orders. Must match Orders' value. |
+
+### Run it
+
+```bash
+docker compose up -d rabbitmq          # from the repository root
+uvicorn app.main:app --port 8086       # REST API (unchanged)
+python consumer_main.py                # consumer, separate terminal
+
+pytest tests/ -v                       # 33 tests; 4 more need a live broker
+```
+
+Full design notes: `payments/LAB4_rabbitmq_payments_shipping.md`.
